@@ -24,8 +24,14 @@ public class AnySlot: Slot {
         self._description = { slot.description }
         
         self._setValue =  { value in
-            guard let value = value as? S.Value else { throw RunsquitoError.typeMismatch }
-            try slot.setValue(value)
+            switch value {
+            case let .some(value):
+                guard let value = value as? S.Value else { throw RunsquitoError.typeMismatch }
+                try slot.setValue(value)
+                
+            case .none:
+                try slot.setValue(nil)
+            }
         }
     }
     
