@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 open class Runsquito {
     // MARK: - Property
@@ -13,6 +14,11 @@ open class Runsquito {
     
     public private(set) var slots: [String: AnySlot] = [:]
     public let description: String?
+    
+    private let _valueWillChange = PassthroughSubject<String, Never>()
+    public var valueWillChange: AnyPublisher<String, Never> { _valueWillChange.eraseToAnyPublisher() }
+    
+    public var cancellableBag: [String: AnyCancellable] = [:]
     
     // MARK: - Intiailzer
     public init(
@@ -24,16 +30,25 @@ open class Runsquito {
     }
     
     // MARK: - Public
-    open func updateSlot<S>(_ slot: S, forKey key: String) where S: Slot {
+    open func updateSlot<Value>(_ slot: Slot<Value>, forKey key: String) {
         slots[key] = slot.eraseToAnySlot()
+        
+        let cancellable = slot.valueWillChange
+            .map { key }
+            .multicast(subject: _valueWillChange)
+            .connect()
+        
+        cancellableBag[key] = AnyCancellable(cancellable)
     }
     
     open func removeSlot(forKey key: String) {
         slots[key] = nil
+        
+        cancellableBag.removeValue(forKey: key)
     }
     
     open func removeAllSlots() {
-        slots.removeAll()
+        slots.forEach { key, _ in removeSlot(forKey: key) }
     }
     
     open func setValue<Value>(_ value: Value?, forKey key: String) throws {

@@ -8,35 +8,32 @@
 import Foundation
 
 /// Type erased `Slot`
-public class AnySlot: Slot {
+public class AnySlot: Slot<Any> {
     // MARK: - Property
     private let _value: () -> Any?
-    public var value: Any? { _value() }
-    
-    private let _description: () -> String?
-    public var description: String? { _description() }
+    public override var value: Any? { _value() }
     
     private let _setValue: (Any?) throws -> Void
     
     // MARK: - Initializer
-    public init<S: Slot>(_ slot: S) {
+    public init<Value>(_ slot: Slot<Value>) {
         self._value = { slot.value }
-        self._description = { slot.description }
-        
         self._setValue =  { value in
             switch value {
             case let .some(value):
-                guard let value = value as? S.Value else { throw RunsquitoError.typeMismatch }
+                guard let value = value as? Value else { throw RunsquitoError.typeMismatch }
                 try slot.setValue(value)
                 
             case .none:
                 try slot.setValue(nil)
             }
         }
+        
+        super.init(slot.value, description: slot.description)
     }
     
     // MARK: - Public
-    public func setValue(_ value: Any?) throws {
+    public override func setValue(_ value: Any?) throws {
         try _setValue(value)
     }
     

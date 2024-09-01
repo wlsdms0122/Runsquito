@@ -7,32 +7,32 @@
 
 import Foundation
 
-open class UserDefaultsSlot<Value>: Slot {
+open class UserDefaultsSlot<Value>: Slot<Value> {
     // MARK: - Prorperty
     private let userDefaults: UserDefaults?
     private let key: String
     private let mapper: any Map<Value>
     
-    public var value: Value? {
+    public override var value: Value? {
         guard let data = userDefaults?.data(forKey: key) else {
             return nil
         }
         
         return try? mapper.decode(from: data)
     }
-    public let description: String?
     
     // MARK: - Initializer
     public init(
         key: String,
         mapper: Mapper<Value>,
-        in userDefault: UserDefaults? = .init(suiteName: "_runsquito"),
+        in userDefaults: UserDefaults? = .init(suiteName: "_runsquito"),
         description: String? = nil
     ) {
-        self.userDefaults = userDefault
+        self.userDefaults = userDefaults
         self.key = key
         self.mapper = mapper
-        self.description = description
+        
+        super.init(nil, description: description)
     }
     
     // MARK: - Public
@@ -41,7 +41,9 @@ open class UserDefaultsSlot<Value>: Slot {
         UserDefaults.standard.removePersistentDomain(forName: "_runsquito")
     }
     
-    open func setValue(_ value: Value?) throws {
+    open override func setValue(_ value: Value?) throws {
+        valueWillChange.send()
+        
         guard let value else {
             userDefaults?.removeObject(forKey: key)
             return
