@@ -18,7 +18,7 @@ open class Runsquito {
     private let _valueWillChange = PassthroughSubject<String, Never>()
     public var valueWillChange: AnyPublisher<String, Never> { _valueWillChange.eraseToAnyPublisher() }
     
-    public var cancellableBag: [String: AnyCancellable] = [:]
+    private var cancellableBag: [String: AnyCancellable] = [:]
     
     // MARK: - Intiailzer
     public init(
