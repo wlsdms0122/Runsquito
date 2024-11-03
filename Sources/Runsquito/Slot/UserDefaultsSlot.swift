@@ -7,6 +7,10 @@
 
 import Foundation
 
+public extension Runsquito {
+    static var userDefaults: UserDefaults? { UserDefaults(suiteName: "_runsquito") }
+}
+
 open class UserDefaultsSlot<Value>: Slot<Value> {
     // MARK: - Prorperty
     private let userDefaults: UserDefaults?
@@ -25,7 +29,7 @@ open class UserDefaultsSlot<Value>: Slot<Value> {
     public init(
         key: String,
         mapper: Mapper<Value>,
-        in userDefaults: UserDefaults? = .init(suiteName: "_runsquito"),
+        in userDefaults: UserDefaults? = Runsquito.userDefaults,
         description: String? = nil
     ) {
         self.userDefaults = userDefaults
@@ -35,12 +39,20 @@ open class UserDefaultsSlot<Value>: Slot<Value> {
         super.init(nil, description: description)
     }
     
-    // MARK: - Public
-    /// Reset all persisted data in the default Runsquito user defaults.
-    public static func reset() {
-        UserDefaults.standard.removePersistentDomain(forName: "_runsquito")
+    public convenience init(
+        key: String,
+        in userDefaults: UserDefaults? = Runsquito.userDefaults,
+        description: String? = nil
+    ) where Value: Codable {
+        self.init(
+            key: key,
+            mapper: .codable,
+            in: userDefaults,
+            description: description
+        )
     }
     
+    // MARK: - Public
     open override func setValue(_ value: Value?) throws {
         valueWillChange.send()
         
