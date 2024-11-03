@@ -9,11 +9,15 @@ import Foundation
 
 public enum RunsquitoError: LocalizedError {
     case typeMismatch
+    case slotNotRegistered(String)
     
     public var errorDescription: String? {
         switch self {
         case .typeMismatch:
-            return "Failed to update because the value doesn't match the slot's value type."
+            "Failed to update the value of the slot because the value doesn't match the slot's type."
+            
+        case let .slotNotRegistered(key):
+            "The slot registered as (\(key)) does not exist."
         }
     }
 }

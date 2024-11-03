@@ -8,56 +8,43 @@
 import Foundation
 import Combine
 
-open class Slot<Value> {
-    public final class ValueChangePublisher: Publisher {
-        public typealias Output = Void
-        public typealias Failure = Never
-        
-        // MARK: - Property
-        private let subject = PassthroughSubject<Void, Never>()
-        
-        // MARK: - Initializer
-        init() { }
-        
-        // MARK: - Lifecycle
-        public func receive<S: Subscriber>(subscriber: S) where Failure == S.Failure, Output == S.Input {
-            subject.subscribe(subscriber)
-        }
-        
-        // MARK: - Public
-        public func send() {
-            subject.send(Void())
-        }
-        
-        // MARK: - Private
-    }
+public final class SlotPublisher: Publisher {
+    public typealias Output = Void
+    public typealias Failure = Never
     
     // MARK: - Property
-    /// The current set value.
-    open private(set) var value: Value?
-    /// The description of the slot.
-    public let description: String?
-    /// The value change event publisher.
-    public let valueWillChange = ValueChangePublisher()
+    private let subject = PassthroughSubject<Output, Failure>()
     
     // MARK: - Initializer
-    public init(_ value: Value? = nil, description: String?) {
-        self.value = value
-        self.description = description
+    init() { }
+    
+    // MARK: - Lifecycle
+    public func receive<S: Subscriber>(subscriber: S) where S.Input == Output, S.Failure == Failure {
+        subject.subscribe(subscriber)
     }
     
     // MARK: - Public
-    /// Set the current value.
-    func setValue(_ value: Value?) throws {
-        valueWillChange.send()
-        self.value = value
+    public func send() {
+        subject.send(Void())
     }
     
     // MARK: - Private
 }
 
-extension Slot {
-    func eraseToAnySlot() -> AnySlot {
-        AnySlot(self)
-    }
+public protocol Slot {
+    associatedtype Value
+    
+    typealias ValueWillChangePublisher = SlotPublisher
+    
+    var value: Value? { get }
+    var description: String? { get }
+    var valueWillChange: ValueWillChangePublisher { get }
+    
+    func setValue(_ value: Value?) throws
+}
+
+public protocol KeyPresentable {
+    associatedtype Value
+    
+    var key: String { get }
 }

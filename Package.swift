@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "Runsquito",
     platforms: [
-        .iOS(.v12),
+        .iOS(.v13),
         .macOS(.v10_15)
     ],
     products: [
@@ -15,6 +15,7 @@ let package = Package(
             targets: ["Runsquito"]
         )
     ],
+    dependencies: [],
     targets: [
         .target(
             name: "Runsquito",
@@ -22,7 +23,9 @@ let package = Package(
         ),
         .testTarget(
             name: "RunsquitoTests",
-            dependencies: ["Runsquito"]
+            dependencies: [
+                "Runsquito"
+            ]
         )
     ]
 )
