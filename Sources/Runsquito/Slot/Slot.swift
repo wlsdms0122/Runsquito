@@ -31,28 +31,20 @@ public final class SlotPublisher: Publisher {
     // MARK: - Private
 }
 
-open class Slot<Value> {
-    public typealias ValueWillChangePublisher = SlotPublisher
+public protocol Slot {
+    associatedtype Value
     
-    // MARK: - Property
-    /// The current set value.
-    open private(set) var value: Value?
-    /// The description of the slot.
-    public let description: String?
-    /// The value change event publisher.
-    public let valueWillChange = ValueWillChangePublisher()
+    typealias ValueWillChangePublisher = SlotPublisher
     
-    // MARK: - Initializer
-    public init(_ value: Value? = nil, description: String? = nil) {
-        self.value = value
-        self.description = description
-    }
+    var value: Value? { get }
+    var description: String? { get }
+    var valueWillChange: ValueWillChangePublisher { get }
     
-    // MARK: - Public
-    open func setValue(_ value: Value?) throws {
-        valueWillChange.send()
-        self.value = value
-    }
+    func setValue(_ value: Value?) throws
+}
+
+public protocol KeyPresentable {
+    associatedtype Value
     
-    // MARK: - Private
+    var key: String { get }
 }
