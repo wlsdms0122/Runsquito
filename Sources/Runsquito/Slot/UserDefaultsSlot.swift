@@ -17,11 +17,8 @@ open class UserDefaultsSlot<Value>: Slot<Value> {
     private let key: String
     private let mapper: any Map<Value>
     
-    public override var value: Value? {
-        guard let data = userDefaults?.data(forKey: key) else {
-            return nil
-        }
-        
+    open override var value: Value? {
+        guard let data = userDefaults?.data(forKey: key) else { return nil }
         return try? mapper.decode(from: data)
     }
     
@@ -54,15 +51,14 @@ open class UserDefaultsSlot<Value>: Slot<Value> {
     
     // MARK: - Public
     open override func setValue(_ value: Value?) throws {
-        valueWillChange.send()
-        
         guard let value else {
             userDefaults?.removeObject(forKey: key)
+            try super.setValue(nil)
             return
         }
         
-        let data = try mapper.encode(value)
-        userDefaults?.set(data, forKey: key)
+        userDefaults?.set(try mapper.encode(value), forKey: key)
+        try super.setValue(value)
     }
     
     // MARK: - Private
