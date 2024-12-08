@@ -16,7 +16,7 @@ public final class SlotPublisher: Publisher {
     private let subject = PassthroughSubject<Output, Failure>()
     
     // MARK: - Initializer
-    init() { }
+    public init() { }
     
     // MARK: - Lifecycle
     public func receive<S: Subscriber>(subscriber: S) where S.Input == Output, S.Failure == Failure {
