@@ -11,6 +11,7 @@ public struct CodableMap<Value: Codable>: Map {
     // MARK: - Property
     
     // MARK: - Initializer
+    public init() { }
     
     // MARK: - Public
     public func encode(_ value: Value) throws -> Data {
