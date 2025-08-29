@@ -43,8 +43,6 @@ public protocol Slot {
     func setValue(_ value: Value?) throws
 }
 
-public protocol KeyPresentable {
-    associatedtype Value
-    
+public protocol KeySlot: Slot {
     var key: String { get }
 }

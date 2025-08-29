@@ -11,7 +11,7 @@ public extension Runsquito {
     static var userDefaults: UserDefaults? { UserDefaults(suiteName: "_runsquito") }
 }
 
-open class UserDefaultsSlot<Value>: Slot, KeyPresentable {
+open class UserDefaultsSlot<Value>: KeySlot {
     // MARK: - Prorperty
     private let userDefaults: UserDefaults?
     public let key: String

@@ -30,19 +30,18 @@ public final class RunsquitoPublisher: Publisher {
     // MARK: - Private
 }
 
-
-open class Runsquito {
+public final class Runsquito: Sendable {
     public typealias ValueWillChangePublisher = RunsquitoPublisher
     
     // MARK: - Property
     public static let `default` = Runsquito(description: "Default runsquito.")
     
-    public private(set) var slots: [String: AnySlot] = [:]
+    public private(set) nonisolated(unsafe) var slots: [String: AnySlot] = [:]
     public let description: String?
     
-    public let valueWillChange = ValueWillChangePublisher()
+    public nonisolated(unsafe) let valueWillChange = ValueWillChangePublisher()
     
-    private var cancellableBag: [String: AnyCancellable] = [:]
+    private nonisolated(unsafe) var cancellableBag: [String: AnyCancellable] = [:]
     
     // MARK: - Intiailzer
     public init(
@@ -54,40 +53,40 @@ open class Runsquito {
     }
     
     // MARK: - Public
-    open func updateSlot<S: Slot>(_ slot: S, for key: TypedKey<S.Value>) {
+    public func updateSlot<S: Slot>(_ slot: S, for key: TypedKey<S.Value>) {
         slots[key.rawValue] = AnySlot(slot)
         
         cancellableBag[key.rawValue] = slot.valueWillChange
             .sink { [weak self] in self?.valueWillChange.send(key.rawValue) }
     }
     
-    open func updateSlot<S: Slot & KeyPresentable>(_ slot: S) {
+    public func updateSlot<S: KeySlot>(_ slot: S) {
         slots[slot.key] = AnySlot(slot)
         
         cancellableBag[slot.key] = slot.valueWillChange
             .sink { [weak self] in self?.valueWillChange.send(slot.key) }
     }
     
-    open func removeSlot<Value>(for key: TypedKey<Value>) {
+    public func removeSlot<Value>(for key: TypedKey<Value>) {
         slots[key.rawValue] = nil
         cancellableBag.removeValue(forKey: key.rawValue)
     }
     
-    open func removeAllSlots() {
+    public func removeAllSlots() {
         slots.map { key, _  in TypedKey<Any>(key) }
             .forEach { key in removeSlot(for: key) }
     }
     
-    open func setValue<Value>(_ value: Value?, for key: TypedKey<Value>) throws {
+    public func setValue<Value>(_ value: Value?, for key: TypedKey<Value>) throws {
         guard let slot = slots[key.rawValue] else { throw RunsquitoError.slotNotRegistered(key.rawValue) }
         try slot.setValue(value)
     }
     
-    open func value<Value>(for key: TypedKey<Value>) -> Value? {
+    public func value<Value>(for key: TypedKey<Value>) -> Value? {
         slots[key.rawValue]?.value as? Value
     }
     
-    open func value<Value>(for key: TypedKey<Value>, default value: Value) -> Value {
+    public func value<Value>(for key: TypedKey<Value>, default value: Value) -> Value {
         slots[key.rawValue]?.value as? Value ?? value
     }
     
